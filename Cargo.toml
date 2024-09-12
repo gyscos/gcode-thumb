@@ -12,3 +12,4 @@ readme = "Readme.md"
 [dependencies]
 base64 = "0.22.1"
 gcode = "0.6.1"
+memmap = "0.7.0"

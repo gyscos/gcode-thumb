@@ -1,8 +1,6 @@
+use base64::{engine::general_purpose::STANDARD, Engine as _};
+
 struct Callbacks;
-
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine as _;
-
 impl gcode::Callbacks for Callbacks {}
 
 fn main() {
@@ -14,13 +12,21 @@ fn main() {
     let input = &args[1];
     let output = &args[2];
 
+    let file = std::fs::File::open(input).unwrap();
+    let mmap = unsafe { memmap::Mmap::map(&file).unwrap() };
+
+    // TODO: Only validate what we actually read? So the OS doesn't need to read the entire file
+    // for the memmap.
+    // What if the file is not actually utf8? _In this script_ we don't rely on utf8 guarantees.
+    let content = unsafe { std::str::from_utf8_unchecked(&mmap) };
+
+    // Accumulate all the potential thumbnails, then pick the best one.
     let mut images = Vec::new();
 
-    // TODO: Only read the first N kB
-    let content = std::fs::read_to_string(input).unwrap();
-
+    // Accumulate lines of base64-encoded data
     let mut base = None;
-    for line in gcode::full_parse_with_callbacks(&content, Callbacks) {
+
+    for line in gcode::full_parse_with_callbacks(content, Callbacks) {
         for comment in line.comments() {
             if comment.value.contains("thumbnail begin") {
                 // Start.
@@ -36,7 +42,10 @@ fn main() {
                 let comment = comment.value.strip_prefix("; ").unwrap();
                 base.as_mut().unwrap().push_str(comment);
             }
-            // TODO: Exit early the moment we see a non-comment
+        }
+        // Exit early the moment we see a non-comment
+        if !line.gcodes().is_empty() {
+            break;
         }
     }
 
