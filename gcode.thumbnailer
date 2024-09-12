@@ -1,0 +1,4 @@
+[Thumbnailer Entry]
+TryExec=gcode-thumb
+Exec=gcode-thumb %i %o
+MimeType=text/x.gcode;
