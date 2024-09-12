@@ -1,7 +1,13 @@
 [package]
 name = "gcode-thumb"
 version = "0.1.0"
+authors = ["Alexandre Bury <alexandre.bury@gmail.com>"]
+description = "A thumbnail generator for gcode files"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/gyscos/gcode-thumb"
+include = ["src/**/*", "LICENSE", "Readme.md"]
+readme = "Readme.md"
 
 [dependencies]
 base64 = "0.22.1"
